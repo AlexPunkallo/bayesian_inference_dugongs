@@ -1,0 +1,34 @@
+LL=function(theta){
+  lik=theta^(sum(x))*(1-theta)^(n-sum(x))
+  return(lik)
+}
+LLV=Vectorize(LL)
+N=200
+n=10
+x=rbinom(n=10,size=1,prob=0.3)
+thetac=sum(x)/length(x)
+k=LLV(thetac)
+curve(LLV(x),from=0,to=1)
+abline(h=k,col="red")
+
+pigreco=function(theta){
+  dbeta(theta,0.5,0.5)
+}
+curve(pigreco(x),0,1)
+curve(k*pigreco(x),from=0,to=1,col="red",ylim=c(0,0.025))
+curve(LLV(x)*pigreco(x),0,1,col="black",add=TRUE)
+
+proposal=rbeta(1000,shape1=0.5,shape2=0.5)
+rug(proposal,col="red")
+rapporto=LLV(proposal)*(pigreco(proposal))/(k*pigreco(proposal))
+J=runif(length(proposal))
+accepted_or_not=(J<=rapporto)
+rug(proposal[accepted_or_not],col="black",0.02)
+simulati_da_AccRej=proposal[accepted_or_not]
+hist(simulati_da_AccRej,freq=FALSE)
+s1=(0.5+sum(x))
+s2=(0.5-sum(x)+length(x))
+curve(dbeta(x,shape1=s1,shape2=s2),add=TRUE)
+mx=beta(sum(x)+0.5,length(x)-sum(x)+0.5)/beta(0.5,0.5)
+curve(LLV(x)*pigreco(x)/mx,0,1,col="black",add=TRUE,lwd=3)
+mx/k
